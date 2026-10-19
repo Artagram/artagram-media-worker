@@ -1,0 +1,28 @@
+server:
+  port: ${PORT:8086}
+
+spring:
+  application:
+    name: artagram-media-worker
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:artagram}
+    password: ${RABBITMQ_PASSWORD:artagram_secret}
+
+artagram:
+  storage:
+    endpoint: ${S3_ENDPOINT:http://localhost:9000}
+    region: ${S3_REGION:us-east-1}
+    bucket: ${S3_BUCKET:artagram-uploads}
+    access-key: ${S3_ACCESS_KEY:minioadmin}
+    secret-key: ${S3_SECRET_KEY:minioadmin}
+    path-style-access: true
+    local-dir: ${STORAGE_LOCAL_DIR:uploads}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
