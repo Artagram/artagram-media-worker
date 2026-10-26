@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -41,7 +43,9 @@ public class MediaStorageService {
 
         S3Client client = null;
         try {
-            var creds = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
+            AwsCredentialsProvider creds = (accessKey != null && !accessKey.isBlank())
+                    ? StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey))
+                    : DefaultCredentialsProvider.create();
             var builder = S3Client.builder()
                     .region(Region.of(region))
                     .credentialsProvider(creds)
