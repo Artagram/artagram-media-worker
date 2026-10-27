@@ -51,6 +51,7 @@ public class MediaEventListener {
             rabbitTemplate.convertAndSend(MediaRabbitMqConfig.EXCHANGE, "media.processed", eventoProcesado);
         } catch (Exception ex) {
             log.error("Error al procesar medios de la publicacion {}: {}", publicacionId, ex.getMessage(), ex);
+            throw new IllegalStateException("Fallo al procesar post.published", ex);
         }
     }
 }
