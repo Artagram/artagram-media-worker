@@ -8,6 +8,8 @@ RUN mvn -q -B package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+# La marca de agua dibuja texto con AWT, que necesita fuentes instaladas.
+RUN apk add --no-cache fontconfig ttf-dejavu
 RUN addgroup -S app && adduser -S app -G app
 COPY --from=build /app/target/artagram-media-worker-0.1.0.jar app.jar
 RUN chown -R app:app /app

@@ -80,7 +80,7 @@ public class MediaStorageService {
         throw new IOException("Archivo no encontrado ni en S3 ni en disco local: " + key);
     }
 
-    public String guardarMiniatura(String rutaDestino, byte[] bytes) throws IOException {
+    public String guardarJpg(String rutaDestino, byte[] bytes) throws IOException {
         String key = limpiarClave(rutaDestino);
         if (s3Client != null) {
             try {
