@@ -38,7 +38,7 @@ class ImageProcessingServiceTest {
         int claros = 0;
         for (int x = desdeX; x < imagen.getWidth(); x++) {
             for (int y = desdeY; y < imagen.getHeight(); y++) {
-                if (new Color(imagen.getRGB(x, y)).getRed() > 128) claros++;
+                if (new Color(imagen.getRGB(x, y)).getRed() > 60) claros++;
             }
         }
         return claros;

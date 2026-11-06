@@ -75,9 +75,10 @@ public class ImageProcessingService {
         return plana;
     }
 
+    /** Discreta a proposito: esta es la imagen que se ve en el feed, no solo la descarga. */
     private void aplicarMarcaDeAgua(BufferedImage image, String autor) {
         String texto = "© " + (autor != null && !autor.isBlank() ? autor : "artista") + " · Artagram";
-        int margen = Math.max(8, image.getWidth() / 60);
+        int margen = Math.max(6, image.getWidth() / 100);
         Graphics2D g = image.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setFont(fuenteQueCabe(g, texto, image.getWidth() - 2 * margen));
@@ -85,19 +86,19 @@ public class ImageProcessingService {
         int x = image.getWidth() - margen - g.getFontMetrics().stringWidth(texto);
         int y = image.getHeight() - margen;
 
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.2f));
         g.setColor(Color.BLACK);
         g.drawString(texto, x + 1, y + 1);
 
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.45f));
         g.setColor(Color.WHITE);
         g.drawString(texto, x, y);
         g.dispose();
     }
 
     private Font fuenteQueCabe(Graphics2D g, String texto, int anchoMaximo) {
-        int tamano = Math.max(TAMANO_MINIMO, anchoMaximo / 40);
-        Font fuente = new Font(Font.SANS_SERIF, Font.BOLD, tamano);
+        int tamano = Math.max(TAMANO_MINIMO, anchoMaximo / 90);
+        Font fuente = new Font(Font.SANS_SERIF, Font.PLAIN, tamano);
         while (tamano > TAMANO_MINIMO && g.getFontMetrics(fuente).stringWidth(texto) > anchoMaximo) {
             tamano--;
             fuente = fuente.deriveFont((float) tamano);
