@@ -17,6 +17,7 @@ import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -52,6 +53,9 @@ public class MediaStorageService {
                     .forcePathStyle(pathStyle);
             if (endpoint != null && !endpoint.isBlank()) {
                 builder.endpointOverride(URI.create(endpoint));
+                // Los S3 locales guardan literal el cuerpo firmado por bloques y la imagen
+                // queda dañada. En AWS real no hay endpoint y se sigue enviando por bloques.
+                builder.serviceConfiguration(S3Configuration.builder().chunkedEncodingEnabled(false).build());
             }
             client = builder.build();
         } catch (Exception ex) {
