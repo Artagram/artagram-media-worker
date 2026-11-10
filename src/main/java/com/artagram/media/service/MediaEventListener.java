@@ -29,7 +29,7 @@ public class MediaEventListener {
     public void onPostPublished(Map<String, Object> payload) {
         String publicacionId = (String) payload.get("publicacionId");
         String imagenUrl = (String) payload.get("imagenUrl");
-        String autor = (String) payload.get("autorId");
+        String autor = (String) payload.get("autorNombre");
         log.info("Procesando imagen para publicacionId={}, imagenUrl={}", publicacionId, imagenUrl);
 
         try {
@@ -37,12 +37,14 @@ public class MediaEventListener {
             var res = imageProcessingService.procesar(bytes, autor);
 
             String miniaturaRuta = "miniaturas/" + publicacionId + ".jpg";
-            String miniaturaUrl = storageService.guardarMiniatura(miniaturaRuta, res.thumbnailBytes());
+            String miniaturaUrl = storageService.guardarJpg(miniaturaRuta, res.thumbnailBytes());
+            String marcaAguaRuta = storageService.guardarJpg("marcadas/" + publicacionId + ".jpg", res.optimizedBytes());
 
             Map<String, Object> eventoProcesado = Map.of(
                     "tipo", "MEDIA_PROCESADA",
                     "publicacionId", publicacionId,
                     "miniaturaUrl", miniaturaUrl,
+                    "marcaAguaRuta", marcaAguaRuta,
                     "blurhash", res.blurhash(),
                     "timestamp", Instant.now().toString()
             );
