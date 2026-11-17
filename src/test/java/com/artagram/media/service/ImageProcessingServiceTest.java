@@ -1,6 +1,7 @@
 package com.artagram.media.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -75,5 +76,35 @@ class ImageProcessingServiceTest {
         var r = service.procesar(Files.readAllBytes(Path.of("src/test/resources/muestra.webp")), "lucia");
 
         assertThat(leer(r.optimizedBytes())).isNotNull();
+    }
+
+    @Test
+    void bytesQueNoSonImagenLanzanIOException() {
+        assertThatThrownBy(() -> service.procesar(new byte[]{1, 2, 3}, "lucia"))
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("decodificar");
+    }
+
+    @Test
+    void conUnNombreLargoLaMarcaDeAguaReduceLaFuenteYTerminaElProceso() throws IOException {
+        byte[] original = png(300, 200, BufferedImage.TYPE_INT_RGB, Color.DARK_GRAY);
+
+        var resultado = service.procesar(original, "un_nombre_de_artista_muy_largo_que_no_cabe_en_la_imagen_".repeat(4));
+
+        assertThat(leer(resultado.optimizedBytes())).isNotNull();
+        assertThat(resultado.blurhash()).isNotBlank();
+    }
+
+    @Test
+    void resultadoComparaLosArraysPorContenido() {
+        var a = new ImageProcessingService.ResultadoProcesamiento(new byte[]{1}, new byte[]{2, 3}, "h");
+        var b = new ImageProcessingService.ResultadoProcesamiento(new byte[]{1}, new byte[]{2, 3}, "h");
+        var distinto = new ImageProcessingService.ResultadoProcesamiento(new byte[]{9}, new byte[]{2, 3}, "h");
+        var vacio = new ImageProcessingService.ResultadoProcesamiento(null, null, null);
+
+        assertThat(a).isEqualTo(b).hasSameHashCodeAs(b).isNotEqualTo(distinto).isNotEqualTo("otro");
+        assertThat(a.toString()).contains("thumbnailBytes=1 bytes", "optimizedBytes=2 bytes", "blurhash=h");
+        assertThat(vacio.toString()).contains("thumbnailBytes=0 bytes");
+        assertThat(vacio).isEqualTo(new ImageProcessingService.ResultadoProcesamiento(null, null, null));
     }
 }

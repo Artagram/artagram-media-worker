@@ -1,6 +1,7 @@
 package com.artagram.media.blurhash;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -24,5 +25,20 @@ class BlurHashEncoderTest {
         assertThat(hash).isNotNull();
         assertThat(hash).isNotEmpty();
         assertThat(hash.length()).isGreaterThan(10);
+    }
+
+    @Test
+    void conUnSoloComponenteSoloCodificaElColorPromedio() {
+        BufferedImage img = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+
+        assertThat(BlurHashEncoder.encode(img, 1, 1)).hasSize(6);
+    }
+
+    @Test
+    void rechazaComponentesFueraDeRango() {
+        BufferedImage img = new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+
+        assertThatThrownBy(() -> BlurHashEncoder.encode(img, 0, 3)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> BlurHashEncoder.encode(img, 3, 10)).isInstanceOf(IllegalArgumentException.class);
     }
 }
