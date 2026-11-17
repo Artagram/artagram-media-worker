@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    <property name="CONSOLE_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [traceId=%X{traceId:-}] - %msg%n"/>
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="artagram-media-worker"/>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+    <!-- Logs JSON en todos los servicios: CloudWatch Logs Insights filtra por
+         traceId a traves de todos los grupos de logs (escenario 10). -->
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>usuarioId</includeMdcKeyName>
+            <includeMdcKeyName>operacion</includeMdcKeyName>
+            <customFields>{"servicio":"${appName}"}</customFields>
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <message>mensaje</message>
+                <thread>hilo</thread>
+                <logger>logger</logger>
+                <level>nivel</level>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
         </encoder>
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="JSON"/>
     </root>
 </configuration>
