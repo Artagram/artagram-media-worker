@@ -29,6 +29,32 @@ public class ImageProcessingService {
     }
 
     public record ResultadoProcesamiento(byte[] thumbnailBytes, byte[] optimizedBytes, String blurhash) {
+
+        @Override
+        public boolean equals(Object otro) {
+            return otro instanceof ResultadoProcesamiento r
+                    && java.util.Arrays.equals(thumbnailBytes, r.thumbnailBytes)
+                    && java.util.Arrays.equals(optimizedBytes, r.optimizedBytes)
+                    && java.util.Objects.equals(blurhash, r.blurhash);
+        }
+
+        @Override
+        public int hashCode() {
+            int h = java.util.Arrays.hashCode(thumbnailBytes);
+            h = 31 * h + java.util.Arrays.hashCode(optimizedBytes);
+            return 31 * h + java.util.Objects.hashCode(blurhash);
+        }
+
+        @Override
+        public String toString() {
+            return "ResultadoProcesamiento[thumbnailBytes=" + longitud(thumbnailBytes)
+                    + " bytes, optimizedBytes=" + longitud(optimizedBytes)
+                    + " bytes, blurhash=" + blurhash + "]";
+        }
+
+        private static int longitud(byte[] datos) {
+            return datos == null ? 0 : datos.length;
+        }
     }
 
     public ResultadoProcesamiento procesar(byte[] imagenOriginal, String autorNombre) throws IOException {

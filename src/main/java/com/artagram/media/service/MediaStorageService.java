@@ -23,11 +23,12 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
-public class MediaStorageService {
+public class MediaStorageService implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(MediaStorageService.class);
 
     private final S3Client s3Client;
+    private AwsCredentialsProvider credenciales;
     private final String bucket;
     private final String localDir;
 
@@ -44,12 +45,13 @@ public class MediaStorageService {
 
         S3Client client = null;
         try {
-            AwsCredentialsProvider creds = (accessKey != null && !accessKey.isBlank())
+            // Se guarda en un campo para cerrarlo junto con el cliente en close().
+            this.credenciales = (accessKey != null && !accessKey.isBlank())
                     ? StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey))
-                    : DefaultCredentialsProvider.create();
+                    : DefaultCredentialsProvider.builder().build();
             var builder = S3Client.builder()
                     .region(Region.of(region))
-                    .credentialsProvider(creds)
+                    .credentialsProvider(credenciales)
                     .forcePathStyle(pathStyle);
             if (endpoint != null && !endpoint.isBlank()) {
                 builder.endpointOverride(URI.create(endpoint));
@@ -114,5 +116,20 @@ public class MediaStorageService {
             ruta = ruta.substring("/media/".length());
         }
         return ruta.replace('\\', '/').replaceAll("^/+", "");
+    }
+
+    /** Spring lo invoca al destruir el bean (AutoCloseable). */
+    @Override
+    public void close() {
+        if (s3Client != null) {
+            s3Client.close();
+        }
+        if (credenciales instanceof AutoCloseable cerrable) {
+            try {
+                cerrable.close();
+            } catch (Exception ex) {
+                log.warn("No se pudo cerrar el proveedor de credenciales: {}", ex.getMessage());
+            }
+        }
     }
 }
